@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mazar-e-Sharif Interactive Map</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .map-container {
+            height: 70vh;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .location-card {
+            transition: all 0.3s ease;
+        }
+        .location-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .active-card {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .deepseek-link {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .deepseek-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .deepseek-link i {
+            margin-right: 0.25rem;
+            transition: transform 0.3s ease;
+        }
+        .deepseek-link:hover i {
+            transform: rotate(10deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <header class="text-center mb-10 relative">
+            <!-- DeepSeek Link -->
+            <a href="https://www.deepseek.com/en" class="deepseek-link">
+                <i class="fas fa-brain"></i>
+                <span>Powered by DeepSeek</span>
+            </a>
+            
+            <h1 class="text-4xl font-bold text-blue-800 mb-3">Mazar-e-Sharif</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Explore the beautiful city of Mazar-e-Sharif, Afghanistan through this interactive map. Discover landmarks, historical sites, and more.
+            </p>
+            <div class="mt-6">
+                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                    <i class="fas fa-map-marker-alt mr-1"></i> Balkh Province
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Map Section -->
+            <div class="lg:w-2/3">
+                <div class="bg-white p-4 rounded-xl shadow-md">
+                    <div id="map" class="map-container"></div>
+                </div>
+                
+                <!-- Map Controls -->
+                <div class="mt-6 bg-white p-4 rounded-xl shadow-md">
+                    <div class="flex flex-wrap gap-4 justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <button id="zoomIn" class="p-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button id="zoomOut" class="p-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button id="resetMap" class="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition flex items-center">
+                                <i class="fas fa-sync-alt mr-2"></i> Reset
+                            </button>
+                        </div>
+                        <div class="relative w-full md:w-auto">
+                            <input type="text" id="searchBox" placeholder="Search in Mazar-e-Sharif..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-700">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locations List -->
+            <div class="lg:w-1/3">
+                <div class="bg-white p-6 rounded-xl shadow-md sticky top-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-landmark mr-2 text-blue-600"></i> Popular Locations
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="location-card p-4 border rounded-lg cursor-pointer hover:border-blue-300 active-card" data-lat="36.7090" data-lng="67.1109" data-zoom="16">
+                            <div class="flex items-start">
+                                <div class="bg-blue-100 p-3 rounded-lg mr-4 text-blue-700">
+                                    <i class="fas fa-mosque text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Blue Mosque</h3>
+                                    <p class="text-sm text-gray-600 mt-1">The famous Shrine of Hazrat Ali, known for its stunning blue tiles.</p>
+                                    <div class="mt-2 flex items-center text-xs text-gray-500">
+                                        <i class="fas fa-star text-yellow-400 mr-1"></i> 4.8 (1.2K reviews)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="location-card p-4 border rounded-lg cursor-pointer hover:border-blue-300" data-lat="36.6979" data-lng="67.1122" data-zoom="15">
+                            <div class="flex items-start">
+                                <div class="bg-green-100 p-3 rounded-lg mr-4 text-green-700">
+                                    <i class="fas fa-utensils text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Balkh Bazaar</h3>
+                                    <p class="text-sm text-gray-600 mt-1">Traditional market with local crafts, spices, and textiles.</p>
+                                    <div class="mt-2 flex items-center text-xs text-gray-500">
+                                        <i class="fas fa-star text-yellow-400 mr-1"></i> 4.5 (890 reviews)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="location-card p-4 border rounded-lg cursor-pointer hover:border-blue-300" data-lat="36.7000" data-lng="67.1000" data-zoom="14">
+                            <div class="flex items-start">
+                                <div class="bg-purple-100 p-3 rounded-lg mr-4 text-purple-700">
+                                    <i class="fas fa-university text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Balkh University</h3>
+                                    <p class="text-sm text-gray-600 mt-1">One of Afghanistan's leading higher education institutions.</p>
+                                    <div class="mt-2 flex items-center text-xs text-gray-500">
+                                        <i class="fas fa-star text-yellow-400 mr-1"></i> 4.7 (560 reviews)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="location-card p-4 border rounded-lg cursor-pointer hover:border-blue-300" data-lat="36.7150" data-lng="67.1200" data-zoom="15">
+                            <div class="flex items-start">
+                                <div class="bg-red-100 p-3 rounded-lg mr-4 text-red-700">
+                                    <i class="fas fa-monument text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Ancient Ruins of Balkh</h3>
+                                    <p class="text-sm text-gray-600 mt-1">Historical site with remains from the ancient city of Bactra.</p>
+                                    <div class="mt-2 flex items-center text-xs text-gray-500">
+                                        <i class="fas fa-star text-yellow-400 mr-1"></i> 4.6 (720 reviews)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-800 mb-4">Quick Facts</h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-start">
+                                <i class="fas fa-city text-blue-500 mt-1 mr-2"></i>
+                                <span>Population: ~500,000 (2023 estimate)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-globe-asia text-blue-500 mt-1 mr-2"></i>
+                                <span>Elevation: 380 meters (1,247 ft) above sea level</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-calendar-alt text-blue-500 mt-1 mr-2"></i>
+                                <span>Best time to visit: March-May (Spring)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                                <span>Known as the "Noble Shrine" and "Blue City"</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-16 text-center text-gray-600 text-sm">
+            <div class="mb-4">
+                <a href="#" class="mx-2 hover:text-blue-600">About</a>
+                <a href="#" class="mx-2 hover:text-blue-600">Privacy</a>
+                <a href="#" class="mx-2 hover:text-blue-600">Terms</a>
+                <a href="#" class="mx-2 hover:text-blue-600">Contact</a>
+                <a href="https://earth.google.com/web/@34.54507109,69.27509461,1783.12393733a,483.8735037d,35y,-0.00000001h,0.18621501t,-0r/data=CgRCAggBMikKJwolCiExY3VMNjNER09GWFliaU1pVEJfVDVnZzFuajFERVRKejYgAToDCgEwQgIIAEoICNL0krYGEAE" 
+                   target="_blank" 
+                   class="mx-2 hover:text-blue-600">
+                   <i class="fas fa-globe-americas mr-1"></i>Google Earth View
+                </a>
+            </div>
+            <p>© 2023 Mazar-e-Sharif Explorer. All rights reserved.</p>
+            <p class="mt-2">Made with <i class="fas fa-heart text-red-500"></i> for Afghanistan</p>
+        </footer>
+    </div>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&libraries=places" async defer></script>
+    
+    <script>
+        let map;
+        let markers = [];
+        let infoWindow;
+        let searchBox;
+        
+        function initMap() {
+            // Default coordinates for Mazar-e-Sharif city center
+            const mazarESharif = { lat: 36.7090, lng: 67.1109 };
+            
+            // Create the map centered on Mazar-e-Sharif
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: mazarESharif,
+                zoom: 13,
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                    mapTypeIds: ["roadmap", "satellite", "hybrid", "terrain"],
+                },
+                streetViewControl: false,
+                fullscreenControl: true,
+                styles: [
+                    {
+                        featureType: "poi",
+                        stylers: [{ visibility: "off" }]
+                    },
+                    {
+                        featureType: "transit",
+                        elementType: "labels.icon",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+            
+            // Create an info window to share between markers
+            infoWindow = new google.maps.InfoWindow();
+            
+            // Add initial markers for popular locations
+            addMarker({ lat: 36.7090, lng: 67.1109, title: "Blue Mosque", icon: "https://maps.google.com/mapfiles/kml/pal3/icon21.png" });
+            addMarker({ lat: 36.6979, lng: 67.1122, title: "Balkh Bazaar", icon: "https://maps.google.com/mapfiles/kml/pal3/icon48.png" });
+            addMarker({ lat: 36.7000, lng: 67.1000, title: "Balkh University", icon: "https://maps.google.com/mapfiles/kml/pal3/icon49.png" });
+            addMarker({ lat: 36.7150, lng: 67.1200, title: "Ancient Ruins of Balkh", icon: "https://maps.google.com/mapfiles/kml/pal3/icon27.png" });
+            
+            // Initialize the search box
+            const input = document.getElementById("searchBox");
+            searchBox = new google.maps.places.SearchBox(input);
+            
+            // Bias the SearchBox results towards current map's viewport
+            map.addListener("bounds_changed", () => {
+                searchBox.setBounds(map.getBounds());
+            });
+            
+            // Listen for the event fired when the user selects a prediction
+            searchBox.addListener("places_changed", () => {
+                const places = searchBox.getPlaces();
+                
+                if (places.length === 0) {
+                    return;
+                }
+                
+                // Clear out the old markers
+                clearMarkers();
+                
+                // For each place, add a marker
+                const bounds = new google.maps.LatLngBounds();
+                places.forEach((place) => {
+                    if (!place.geometry || !place.geometry.location) {
+                        console.log("Returned place contains no geometry");
+                        return;
+                    }
+                    
+                    addMarker({
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng(),
+                        title: place.name,
+                        address: place.formatted_address
+                    });
+                    
+                    if (place.geometry.viewport) {
+                        bounds.union(place.geometry.viewport);
+                    } else {
+                        bounds.extend(place.geometry.location);
+                    }
+                });
+                map.fitBounds(bounds);
+            });
+            
+            // Set up event listeners for map controls
+            document.getElementById("zoomIn").addEventListener("click", () => {
+                map.setZoom(map.getZoom() + 1);
+            });
+            
+            document.getElementById("zoomOut").addEventListener("click", () => {
+                map.setZoom(map.getZoom() - 1);
+            });
+            
+            document.getElementById("resetMap").addEventListener("click", () => {
+                map.setCenter(mazarESharif);
+                map.setZoom(13);
+                clearMarkers();
+                // Re-add the default markers
+                addMarker({ lat: 36.7090, lng: 67.1109, title: "Blue Mosque", icon: "https://maps.google.com/mapfiles/kml/pal3/icon21.png" });
+                addMarker({ lat: 36.6979, lng: 67.1122, title: "Balkh Bazaar", icon: "https://maps.google.com/mapfiles/kml/pal3/icon48.png" });
+                addMarker({ lat: 36.7000, lng: 67.1000, title: "Balkh University", icon: "https://maps.google.com/mapfiles/kml/pal3/icon49.png" });
+                addMarker({ lat: 36.7150, lng: 67.1200, title: "Ancient Ruins of Balkh", icon: "https://maps.google.com/mapfiles/kml/pal3/icon27.png" });
+            });
+            
+            document.getElementById("searchBtn").addEventListener("click", () => {
+                const query = document.getElementById("searchBox").value;
+                if (query.trim() !== "") {
+                    const request = {
+                        query: query + " Mazar-e-Sharif",
+                        fields: ["name", "geometry", "formatted_address"],
+                    };
+                    
+                    const service = new google.maps.places.PlacesService(map);
+                    service.findPlaceFromQuery(request, (results, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                            clearMarkers();
+                            const place = results[0];
+                            if (!place.geometry || !place.geometry.location) return;
+                            
+                            addMarker({
+                                lat: place.geometry.location.lat(),
+                                lng: place.geometry.location.lng(),
+                                title: place.name,
+                                address: place.formatted_address
+                            });
+                            
+                            map.setCenter(place.geometry.location);
+                            map.setZoom(16);
+                        }
+                    });
+                }
+            });
+            
+            // Set up location card click handlers
+            const locationCards = document.querySelectorAll(".location-card");
+            locationCards.forEach(card => {
+                card.addEventListener("click", function() {
+                    // Remove active class from all cards
+                    locationCards.forEach(c => c.classList.remove("active-card", "border-blue-300"));
+                    
+                    // Add active class to clicked card
+                    this.classList.add("active-card", "border-blue-300");
+                    
+                    const lat = parseFloat(this.getAttribute("data-lat"));
+                    const lng = parseFloat(this.getAttribute("data-lng"));
+                    const zoom = parseInt(this.getAttribute("data-zoom"));
+                    
+                    // Center and zoom map to this location
+                    map.setCenter({ lat, lng });
+                    map.setZoom(zoom);
+                    
+                    // Find and highlight the corresponding marker
+                    markers.forEach(marker => {
+                        const markerPos = marker.getPosition();
+                        if (markerPos.lat() === lat && markerPos.lng() === lng) {
+                            google.maps.event.trigger(marker, "click");
+                        }
+                    });
+                });
+            });
+        }
+        
+        function addMarker({ lat, lng, title, address, icon }) {
+            const marker = new google.maps.Marker({
+                position: { lat, lng },
+                map,
+                title,
+                icon: icon || null
+            });
+            
+            markers.push(marker);
+            
+            // Add click listener for the marker
+            marker.addListener("click", () => {
+                infoWindow.setContent(`
+                    <div class="p-2">
+                        <h3 class="font-bold text-lg">${title}</h3>
+                        ${address ? `<p class="text-sm text-gray-600 mt-1">${address}</p>` : ''}
+                        <div class="mt-2">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" 
+                               target="_blank" 
+                               class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
+                                <i class="fas fa-directions mr-1"></i> Get Directions
+                            </a>
+                            <a href="https://earth.google.com/web/@${lat},${lng},1500a,1000d,35y,0h,0t,0r" 
+                               target="_blank" 
+                               class="text-green-600 hover:text-green-800 text-sm flex items-center mt-1">
+                                <i class="fas fa-globe-americas mr-1"></i> Google Earth View
+                            </a>
+                        </div>
+                    </div>
+                `);
+                infoWindow.open(map, marker);
+            });
+        }
+        
+        function clearMarkers() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+        }
+        
+        // Handle case where Google Maps API fails to load
+        window.gm_authFailure = function() {
+            document.getElementById("map").innerHTML = `
+                <div class="h-full flex items-center justify-center bg-red-50 text-red-600 p-4 rounded-lg">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+                        <h3 class="font-bold text-lg">Map Loading Error</h3>
+                        <p class="mt-1">Failed to load Google Maps. Please check your internet connection.</p>
+                        <button onclick="window.location.reload()" class="mt-3 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200">
+                            <i class="fas fa-sync-alt mr-1"></i> Reload
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+    </script>
+</body>
+</html>
